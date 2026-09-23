@@ -8,8 +8,7 @@
 // CONFIGURACIÓN DE LA API
 // ============================================================
 
-const API_BASE_URL = "http://127.0.0.1:8000";
-
+const API_BASE_URL = "https://nova-living-rein.onrender.com";
 
 // ============================================================
 // VARIABLES GLOBALES
