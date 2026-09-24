@@ -1,301 +1,374 @@
-﻿import sqlite3
-from pathlib import Path
+﻿# ============================================================
+# NOVA LIVING
+# CARGADOR INICIAL DEL CATÁLOGO
+# ============================================================
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-DATABASE_FILE = BASE_DIR / "database" / "nova_living.db"
+from database import (
+    obtener_conexion,
+    crear_tabla_categorias,
+    crear_tabla_subcategorias,
+    crear_tabla_productos,
+    crear_tabla_configuracion
+)
 
-productos = [
-    # SALA
+
+CATEGORIAS = [
+    {
+        "nombre": "Sala",
+        "descripcion": "Sofás, poltronas y mesas para crear espacios acogedores.",
+        "imagen": "images/sofa-oslo.jpg"
+    },
+    {
+        "nombre": "Dormitorio",
+        "descripcion": "Muebles pensados para crear dormitorios cómodos y elegantes.",
+        "imagen": "images/cama-aurora.jpg"
+    },
+    {
+        "nombre": "Comedor",
+        "descripcion": "Mesas y sillas para compartir momentos especiales.",
+        "imagen": "images/mesa-comedor-nordic.jpg"
+    },
+    {
+        "nombre": "Oficina",
+        "descripcion": "Soluciones funcionales para estudiar, trabajar y organizar.",
+        "imagen": "images/escritorio-lyon.jpg"
+    },
+    {
+        "nombre": "Decoración",
+        "descripcion": "Detalles que aportan personalidad y estilo a cada espacio.",
+        "imagen": "images/lampara-torre.jpg"
+    },
+    {
+        "nombre": "Exterior",
+        "descripcion": "Muebles para terrazas, balcones y espacios exteriores.",
+        "imagen": "images/silla-terra.jpg"
+    }
+]
+
+
+SUBCATEGORIAS = [
+    ("Sofás", "Sala"),
+    ("Poltronas", "Sala"),
+    ("Mesas de centro", "Sala"),
+
+    ("Camas", "Dormitorio"),
+    ("Mesas de noche", "Dormitorio"),
+    ("Cómodas", "Dormitorio"),
+
+    ("Mesas", "Comedor"),
+    ("Sillas", "Comedor"),
+    ("Juegos de comedor", "Comedor"),
+
+    ("Escritorios", "Oficina"),
+    ("Sillas", "Oficina"),
+    ("Estanterías", "Oficina"),
+
+    ("Lámparas", "Decoración"),
+    ("Espejos", "Decoración"),
+    ("Cuadros", "Decoración"),
+    ("Alfombras", "Decoración"),
+    ("Plantas decorativas", "Decoración"),
+
+    ("Sillas", "Exterior"),
+    ("Mesas", "Exterior"),
+    ("Muebles para terraza", "Exterior")
+]
+
+
+PRODUCTOS = [
+    {
+        "nombre": "Sofá Oslo",
+        "subcategoria": "Sofás",
+        "categoria": "Sala",
+        "precio": 1899000,
+        "stock": 5,
+        "descripcion": "Sofá moderno de tres puestos para espacios contemporáneos.",
+        "imagen": "sofa-oslo.jpg"
+    },
     {
         "nombre": "Mesa de Centro Roma",
-        "subcategoria_id": 3,
+        "subcategoria": "Mesas de centro",
+        "categoria": "Sala",
         "precio": 649000,
         "stock": 8,
-        "descripcion": "Mesa de centro de diseño contemporáneo con acabado en madera natural.",
+        "descripcion": "Mesa de centro de diseño moderno para complementar tu sala.",
         "imagen": "mesa-centro-roma.jpg"
     },
     {
         "nombre": "Sillón Valencia",
-        "subcategoria_id": 2,
+        "subcategoria": "Poltronas",
+        "categoria": "Sala",
         "precio": 899000,
         "stock": 6,
-        "descripcion": "Sillón tapizado de líneas suaves, ideal para complementar espacios modernos.",
+        "descripcion": "Poltrona elegante y confortable para espacios contemporáneos.",
         "imagen": "sillon-valencia.jpg"
     },
 
-    # DORMITORIO
     {
         "nombre": "Cama Aurora",
-        "subcategoria_id": 4,
+        "subcategoria": "Camas",
+        "categoria": "Dormitorio",
         "precio": 1599000,
         "stock": 5,
-        "descripcion": "Cama de estilo contemporáneo pensada para crear un dormitorio cálido y elegante.",
+        "descripcion": "Cama de diseño moderno para transformar tu dormitorio.",
         "imagen": "cama-aurora.jpg"
     },
     {
         "nombre": "Cómoda Milano",
-        "subcategoria_id": 6,
+        "subcategoria": "Cómodas",
+        "categoria": "Dormitorio",
         "precio": 1199000,
         "stock": 7,
-        "descripcion": "Cómoda de madera con amplio espacio de almacenamiento y diseño minimalista.",
+        "descripcion": "Cómoda amplia y elegante para mantener tus espacios organizados.",
         "imagen": "comoda-milano.jpg"
     },
     {
         "nombre": "Mesa de Noche Siena",
-        "subcategoria_id": 5,
+        "subcategoria": "Mesas de noche",
+        "categoria": "Dormitorio",
         "precio": 459000,
         "stock": 10,
-        "descripcion": "Mesa de noche compacta con acabado cálido para complementar cualquier dormitorio.",
+        "descripcion": "Mesa de noche compacta con diseño contemporáneo.",
         "imagen": "mesa-noche-siena.jpg"
     },
 
-    # COMEDOR
     {
         "nombre": "Mesa Comedor Nordic",
-        "subcategoria_id": 7,
+        "subcategoria": "Mesas",
+        "categoria": "Comedor",
         "precio": 1399000,
         "stock": 5,
-        "descripcion": "Mesa de comedor de inspiración nórdica para reuniones familiares y sociales.",
+        "descripcion": "Mesa de comedor de estilo nórdico para compartir en familia.",
         "imagen": "mesa-comedor-nordic.jpg"
     },
     {
         "nombre": "Silla Nordic",
-        "subcategoria_id": 8,
+        "subcategoria": "Sillas",
+        "categoria": "Comedor",
         "precio": 329000,
         "stock": 18,
-        "descripcion": "Silla tapizada de inspiración nórdica, cómoda y versátil para el comedor.",
+        "descripcion": "Silla de comedor cómoda con diseño nórdico.",
         "imagen": "silla-nordic.jpg"
     },
 
-    # OFICINA
     {
         "nombre": "Escritorio Lyon",
-        "subcategoria_id": 10,
+        "subcategoria": "Escritorios",
+        "categoria": "Oficina",
         "precio": 879000,
         "stock": 9,
-        "descripcion": "Escritorio contemporáneo diseñado para oficinas y espacios de trabajo en casa.",
+        "descripcion": "Escritorio funcional y elegante para trabajar o estudiar.",
         "imagen": "escritorio-lyon.jpg"
     },
     {
         "nombre": "Estantería Milo",
-        "subcategoria_id": 12,
+        "subcategoria": "Estanterías",
+        "categoria": "Oficina",
         "precio": 749000,
         "stock": 7,
-        "descripcion": "Estantería abierta de estructura ligera para organizar libros y objetos decorativos.",
+        "descripcion": "Estantería moderna para organizar libros y objetos.",
         "imagen": "estanteria-milo.jpg"
     },
 
-    # DECORACIÓN
     {
         "nombre": "Lámpara Torre",
-        "subcategoria_id": 13,
+        "subcategoria": "Lámparas",
+        "categoria": "Decoración",
         "precio": 389000,
         "stock": 12,
-        "descripcion": "Lámpara de pie de diseño elegante para aportar iluminación cálida al ambiente.",
+        "descripcion": "Lámpara decorativa de diseño elegante para interiores.",
         "imagen": "lampara-torre.jpg"
+    },
+    {
+        "nombre": "Alfombra Lisboa",
+        "subcategoria": "Alfombras",
+        "categoria": "Decoración",
+        "precio": 529000,
+        "stock": 8,
+        "descripcion": "Alfombra decorativa para aportar calidez y personalidad.",
+        "imagen": "alfombra-lisboa.jpg"
+    },
+    {
+        "nombre": "Planta Decorativa",
+        "subcategoria": "Plantas decorativas",
+        "categoria": "Decoración",
+        "precio": 189000,
+        "stock": 15,
+        "descripcion": "Planta decorativa para complementar espacios modernos.",
+        "imagen": "planta-decorativa.jpg"
+    },
+
+    {
+        "nombre": "Silla Terra",
+        "subcategoria": "Sillas",
+        "categoria": "Exterior",
+        "precio": 429000,
+        "stock": 10,
+        "descripcion": "Silla resistente y elegante para espacios exteriores.",
+        "imagen": "silla-terra.jpg"
+    },
+    {
+        "nombre": "Mesa Terra",
+        "subcategoria": "Mesas",
+        "categoria": "Exterior",
+        "precio": 1199000,
+        "stock": 6,
+        "descripcion": "Mesa para exteriores con diseño moderno y funcional.",
+        "imagen": "mesa-terra.jpg"
+    },
+    {
+        "nombre": "Mueble Terraza Nova",
+        "subcategoria": "Muebles para terraza",
+        "categoria": "Exterior",
+        "precio": 2599000,
+        "stock": 4,
+        "descripcion": "Mueble completo para crear un espacio exterior confortable.",
+        "imagen": "mueble-terraza-nova.jpg"
     }
 ]
 
-conexion = sqlite3.connect(DATABASE_FILE)
-cursor = conexion.cursor()
 
-# Crear subcategorías adicionales de decoración
-nuevas_subcategorias = [
-    (
-        "Alfombras",
-        5,
-        "Alfombras decorativas para complementar los espacios.",
-        None
-    ),
-    (
-        "Plantas decorativas",
-        5,
-        "Elementos decorativos inspirados en la naturaleza.",
-        None
-    )
-]
+def cargar_catalogo():
+    """
+    Crea las tablas y carga el catálogo únicamente
+    cuando la base de datos todavía está vacía.
+    """
 
-for nombre, categoria_id, descripcion, imagen in nuevas_subcategorias:
+    crear_tabla_categorias()
+    crear_tabla_subcategorias()
+    crear_tabla_productos()
+    crear_tabla_configuracion()
 
-    cursor.execute(
-        """
-        SELECT id
-        FROM subcategorias
-        WHERE nombre = ?
-        AND categoria_id = ?
-        """,
-        (nombre, categoria_id)
-    )
+    conexion = obtener_conexion()
+    cursor = conexion.cursor()
 
-    if cursor.fetchone() is None:
+    # --------------------------------------------------------
+    # COMPROBAR SI YA EXISTE EL CATÁLOGO
+    # --------------------------------------------------------
 
-        cursor.execute(
-            """
-            INSERT INTO subcategorias
-            (
+    cursor.execute("SELECT COUNT(*) AS cantidad FROM productos")
+    cantidad_productos = cursor.fetchone()["cantidad"]
+
+    if cantidad_productos > 0:
+        conexion.close()
+        print("Nova Living: el catálogo ya existe.")
+        return
+
+    # --------------------------------------------------------
+    # CATEGORÍAS
+    # --------------------------------------------------------
+
+    categoria_ids = {}
+
+    for categoria in CATEGORIAS:
+
+        cursor.execute("""
+            INSERT OR IGNORE INTO categorias (
+                nombre,
+                descripcion,
+                imagen
+            )
+            VALUES (?, ?, ?)
+        """, (
+            categoria["nombre"],
+            categoria["descripcion"],
+            categoria["imagen"]
+        ))
+
+        cursor.execute("""
+            SELECT id
+            FROM categorias
+            WHERE nombre = ?
+        """, (categoria["nombre"],))
+
+        categoria_id = cursor.fetchone()["id"]
+
+        categoria_ids[categoria["nombre"]] = categoria_id
+
+    # --------------------------------------------------------
+    # SUBCATEGORÍAS
+    # --------------------------------------------------------
+
+    subcategoria_ids = {}
+
+    for nombre, categoria_nombre in SUBCATEGORIAS:
+
+        categoria_id = categoria_ids[categoria_nombre]
+
+        cursor.execute("""
+            INSERT OR IGNORE INTO subcategorias (
                 nombre,
                 categoria_id,
                 descripcion,
                 imagen
             )
             VALUES (?, ?, ?, ?)
-            """,
+        """, (
+            nombre,
+            categoria_id,
+            f"Productos de {nombre.lower()} de Nova Living.",
+            None
+        ))
+
+        cursor.execute("""
+            SELECT id
+            FROM subcategorias
+            WHERE nombre = ?
+              AND categoria_id = ?
+        """, (
+            nombre,
+            categoria_id
+        ))
+
+        subcategoria_id = cursor.fetchone()["id"]
+
+        subcategoria_ids[
+            (categoria_nombre, nombre)
+        ] = subcategoria_id
+
+    # --------------------------------------------------------
+    # PRODUCTOS
+    # --------------------------------------------------------
+
+    for producto in PRODUCTOS:
+
+        subcategoria_id = subcategoria_ids[
             (
+                producto["categoria"],
+                producto["subcategoria"]
+            )
+        ]
+
+        cursor.execute("""
+            INSERT INTO productos (
                 nombre,
-                categoria_id,
+                subcategoria_id,
+                precio,
+                stock,
                 descripcion,
                 imagen
             )
-        )
-
-conexion.commit()
-
-# Obtener IDs de las nuevas subcategorías
-
-cursor.execute(
-    """
-    SELECT id
-    FROM subcategorias
-    WHERE nombre = 'Alfombras'
-    AND categoria_id = 5
-    """
-)
-
-alfombras = cursor.fetchone()
-
-cursor.execute(
-    """
-    SELECT id
-    FROM subcategorias
-    WHERE nombre = 'Plantas decorativas'
-    AND categoria_id = 5
-    """
-)
-
-plantas = cursor.fetchone()
-
-# Agregar productos de decoración
-
-if alfombras:
-
-    productos.append(
-        {
-            "nombre": "Alfombra Lisboa",
-            "subcategoria_id": alfombras[0],
-            "precio": 529000,
-            "stock": 8,
-            "descripcion": "Alfombra decorativa de textura suave para completar ambientes contemporáneos.",
-            "imagen": "alfombra-lisboa.jpg"
-        }
-    )
-
-if plantas:
-
-    productos.append(
-        {
-            "nombre": "Planta Decorativa",
-            "subcategoria_id": plantas[0],
-            "precio": 189000,
-            "stock": 15,
-            "descripcion": "Elemento decorativo inspirado en la naturaleza para aportar frescura al hogar.",
-            "imagen": "planta-decorativa.jpg"
-        }
-    )
-
-# Insertar productos sin duplicarlos
-
-insertados = 0
-existentes = 0
-
-for producto in productos:
-
-    cursor.execute(
-        """
-        SELECT id
-        FROM productos
-        WHERE nombre = ?
-        """,
-        (producto["nombre"],)
-    )
-
-    if cursor.fetchone() is not None:
-        existentes += 1
-        continue
-
-    cursor.execute(
-        """
-        INSERT INTO productos
-        (
-            nombre,
-            subcategoria_id,
-            precio,
-            stock,
-            descripcion,
-            imagen
-        )
-        VALUES (?, ?, ?, ?, ?, ?)
-        """,
-        (
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (
             producto["nombre"],
-            producto["subcategoria_id"],
+            subcategoria_id,
             producto["precio"],
             producto["stock"],
             producto["descripcion"],
             producto["imagen"]
-        )
-    )
+        ))
 
-    insertados += 1
+    conexion.commit()
+    conexion.close()
 
-conexion.commit()
+    print("============================================")
+    print("NOVA LIVING")
+    print("Catálogo cargado correctamente.")
+    print(f"Categorías: {len(CATEGORIAS)}")
+    print(f"Subcategorías: {len(SUBCATEGORIAS)}")
+    print(f"Productos: {len(PRODUCTOS)}")
+    print("============================================")
 
-# Mostrar catálogo final
 
-cursor.execute(
-    """
-    SELECT
-        p.id,
-        p.nombre,
-        c.nombre AS categoria,
-        s.nombre AS subcategoria,
-        p.precio,
-        p.stock,
-        p.imagen
-    FROM productos p
-    INNER JOIN subcategorias s
-        ON p.subcategoria_id = s.id
-    INNER JOIN categorias c
-        ON s.categoria_id = c.id
-    ORDER BY p.id
-    """
-)
-
-productos_db = cursor.fetchall()
-
-conexion.close()
-
-print()
-print("=" * 110)
-print("                 CATÁLOGO NOVA LIVING")
-print("=" * 110)
-print()
-
-for producto in productos_db:
-
-    print(
-        f"ID: {producto[0]:<3} | "
-        f"{producto[1]:<28} | "
-        f"{producto[2]:<12} | "
-        f"{producto[3]:<22} | "
-        f"${producto[4]:>10,.0f} | "
-        f"Stock: {producto[5]:<3} | "
-        f"{producto[6]}"
-    )
-
-print()
-print("=" * 110)
-print(f"Productos nuevos insertados: {insertados}")
-print(f"Productos que ya existían: {existentes}")
-print(f"Total de productos: {len(productos_db)}")
-print("=" * 110)
-print()
+if __name__ == "__main__":
+    cargar_catalogo()

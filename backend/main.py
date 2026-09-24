@@ -1,3 +1,4 @@
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -11,6 +12,8 @@ from database import (
     crear_tabla_configuracion,
     crear_tabla_pagos
 )
+
+from cargar_catalogo import cargar_catalogo
 
 from routes.products import router as products_router
 from routes.categories import router as categories_router
@@ -35,17 +38,13 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-
     allow_origins=[
         "http://127.0.0.1:5500",
         "http://localhost:5500",
         "http://127.0.0.1:8000",
         "http://localhost:8000",
-
-        # GitHub Pages
         "https://joansalg-bot.github.io"
     ],
-
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -53,7 +52,7 @@ app.add_middleware(
 
 
 # ============================================================
-# CREACIÓN DE TABLAS
+# CREAR TABLAS
 # ============================================================
 
 crear_tabla_categorias()
@@ -64,6 +63,13 @@ crear_tabla_pedidos()
 crear_tabla_detalle_pedido()
 crear_tabla_configuracion()
 crear_tabla_pagos()
+
+
+# ============================================================
+# CARGAR CATÁLOGO INICIAL
+# ============================================================
+
+cargar_catalogo()
 
 
 # ============================================================
@@ -86,7 +92,6 @@ app.include_router(auth_router)
 
 @app.get("/")
 def inicio():
-
     return {
         "mensaje": "Bienvenido a Nova Living",
         "estado": "API funcionando correctamente"
