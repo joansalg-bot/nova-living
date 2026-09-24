@@ -29,19 +29,32 @@ app = FastAPI(
 )
 
 
+# ============================================================
+# CORS
+# ============================================================
+
 app.add_middleware(
     CORSMiddleware,
+
     allow_origins=[
         "http://127.0.0.1:5500",
         "http://localhost:5500",
         "http://127.0.0.1:8000",
-        "http://localhost:8000"
+        "http://localhost:8000",
+
+        # GitHub Pages
+        "https://joansalg-bot.github.io"
     ],
+
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+
+# ============================================================
+# CREACIÓN DE TABLAS
+# ============================================================
 
 crear_tabla_categorias()
 crear_tabla_subcategorias()
@@ -53,6 +66,10 @@ crear_tabla_configuracion()
 crear_tabla_pagos()
 
 
+# ============================================================
+# RUTAS
+# ============================================================
+
 app.include_router(products_router)
 app.include_router(categories_router)
 app.include_router(subcategories_router)
@@ -63,8 +80,13 @@ app.include_router(payments_router)
 app.include_router(auth_router)
 
 
+# ============================================================
+# RUTA PRINCIPAL
+# ============================================================
+
 @app.get("/")
 def inicio():
+
     return {
         "mensaje": "Bienvenido a Nova Living",
         "estado": "API funcionando correctamente"
