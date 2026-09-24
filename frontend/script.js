@@ -334,8 +334,9 @@ function obtenerRutaImagen(nombreImagen) {
         return generarPlaceholder("Nova Living");
     }
 
-    const imagen = String(nombreImagen).trim();
+    let imagen = String(nombreImagen).trim();
 
+    // Si la API ya entrega una URL completa, la usamos directamente.
     if (
         imagen.startsWith("http://") ||
         imagen.startsWith("https://") ||
@@ -344,11 +345,25 @@ function obtenerRutaImagen(nombreImagen) {
         return imagen;
     }
 
-    if (imagen.startsWith("images/")) {
-        return imagen;
+    // Normalizamos la ruta para que funcione tanto en local
+    // como en GitHub Pages (/nova-living/).
+    imagen = imagen.replace(/\\/g, "/");
+
+    // Eliminamos "./" iniciales y "/" iniciales para evitar
+    // que el navegador busque la imagen desde el dominio raíz.
+    imagen = imagen.replace(/^\.\//, "");
+    imagen = imagen.replace(/^\/+/, "");
+
+    // Si la base de datos ya guarda "images/archivo.jpg",
+    // conservamos esa carpeta. Si solo guarda "archivo.jpg",
+    // la agregamos.
+    if (!imagen.startsWith("images/")) {
+        imagen = `images/${imagen}`;
     }
 
-    return `images/${imagen}`;
+    // Construimos la URL a partir de la ubicación real de index.html.
+    // Esto funciona correctamente en GitHub Pages y en el servidor local.
+    return new URL(imagen, document.baseURI).href;
 }
 
 
